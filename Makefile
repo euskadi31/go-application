@@ -1,3 +1,5 @@
+BUILD=build
+
 .PHONY: release
 release:
 	@echo "Release v$(version)"
@@ -55,3 +57,12 @@ docs:
 	@tar -c --exclude='.git' --exclude='tmp' . | tar -x -C /tmp/tmpgopath/src/github.com/euskadi31/go-eventemitter
 	@echo -e "open http://localhost:6060/pkg/github.com/euskadi31/go-eventemitter\n"
 	@GOROOT=/tmp/tmpgoroot/ GOPATH=/tmp/tmpgopath/ godoc -http=localhost:6060
+
+${BUILD}/demo-app: $(shell find . -type f -print | grep -v vendor | grep "\.go")
+	@echo "Building demo-app..."
+	@go generate ./cmd/demo-app/
+	@go build -o $@ ./cmd/demo-app/
+
+run-demo-app: ${BUILD}/demo-app
+	@echo "Running demo-app..."
+	@./$<

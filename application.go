@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/euskadi31/go-application/provider"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
 )
@@ -30,9 +31,14 @@ type App struct {
 
 // New Application
 func New() Application {
-	return &App{
+	app := &App{
 		container: service.New(),
 	}
+
+	app.Register(provider.NewEventDispatcherServiceProvider())
+	app.Register(provider.NewHTTPServiceProvider())
+
+	return app
 }
 
 // Register ServiceProvider
