@@ -5,14 +5,36 @@
 package application
 
 import (
+	"errors"
 	"testing"
 	"time"
 
+	"github.com/euskadi31/go-service"
 	"github.com/stretchr/testify/assert"
 )
 
+type mockProvider struct{}
+
+func (mockProvider) Register(app service.Container) {
+
+}
+
+func (mockProvider) Priority() int {
+	return 1
+}
+
+func (mockProvider) Start(app service.Container) error {
+	return errors.New("fail")
+}
+
+func (mockProvider) Stop(app service.Container) error {
+	return errors.New("fail")
+}
+
 func TestApplication(t *testing.T) {
 	app := New()
+
+	app.Register(&mockProvider{})
 
 	go func() {
 		assert.NoError(t, app.Run())

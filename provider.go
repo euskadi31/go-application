@@ -14,11 +14,11 @@ import (
 // ServiceProvider interface
 type ServiceProvider interface {
 	Register(app service.Container)
-	Priority() int
 }
 
 // BootableProvider interface
 type BootableProvider interface {
+	Priority() int
 	Start(app service.Container) error
 	Stop(app service.Container) error
 }
@@ -29,8 +29,8 @@ type EventListenerProvider interface {
 }
 
 type providerSorter struct {
-	providers []ServiceProvider
-	by        func(left, right ServiceProvider) bool
+	providers []BootableProvider
+	by        func(left, right BootableProvider) bool
 }
 
 // Len is part of sort.Interface.
@@ -49,10 +49,10 @@ func (s *providerSorter) Less(i, j int) bool {
 }
 
 // By sorter
-type By func(left, right ServiceProvider) bool
+type By func(left, right BootableProvider) bool
 
 // Sort is a method on the function type, By, that sorts the argument slice according to the function.
-func (by By) Sort(providers []ServiceProvider) {
+func (by By) Sort(providers []BootableProvider) {
 	ps := &providerSorter{
 		providers: providers,
 		by:        by, // The Sort method's receiver is the function (closure) that defines the sort order.

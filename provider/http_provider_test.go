@@ -16,7 +16,7 @@ func TestHTTPServiceProvider(t *testing.T) {
 
 	p := NewHTTPServiceProvider()
 
-	assert.Equal(t, 0, p.Priority())
+	assert.Equal(t, 255, p.Priority())
 
 	p.Register(container)
 

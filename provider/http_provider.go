@@ -24,11 +24,6 @@ func NewHTTPServiceProvider() *HTTPServiceProvider {
 	return &HTTPServiceProvider{}
 }
 
-// Priority implements application.ServiceProvider
-func (p HTTPServiceProvider) Priority() int {
-	return 0
-}
-
 // Register implements application.ServiceProvider
 func (p HTTPServiceProvider) Register(app service.Container) {
 	app.Set(HTTPServerConfigKey, func(c service.Container) interface{} {
@@ -42,6 +37,11 @@ func (p HTTPServiceProvider) Register(app service.Container) {
 
 		return router // *server.Server
 	})
+}
+
+// Priority implements application.BootableProvider
+func (p HTTPServiceProvider) Priority() int {
+	return 255
 }
 
 // Start implements application.BootableProvider

@@ -25,6 +25,7 @@ var _ Application = (*App)(nil)
 
 // App struct
 type App struct {
+	signal    chan os.Signal
 	container service.Container
 	providers []ServiceProvider
 }
@@ -32,6 +33,7 @@ type App struct {
 // New Application
 func New() Application {
 	app := &App{
+		signal:    make(chan os.Signal, 1),
 		container: service.New(),
 	}
 
@@ -50,38 +52,41 @@ func (a *App) Register(provider ServiceProvider) {
 
 // Run Application
 func (a *App) Run() (err error) {
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
-
-	By(func(left, right ServiceProvider) bool {
-		return left.Priority() < right.Priority()
-	}).Sort(a.providers)
+	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
 	log.Info().Msg("Starting...")
+
+	bootables := []BootableProvider{}
 
 	for _, provider := range a.providers {
 		provider.Register(a.container)
 
 		if bootable, ok := provider.(BootableProvider); ok {
-			go func() {
-				if err := bootable.Start(a.container); err != nil {
-					log.Error().Err(err).Msg("Start failed")
-				}
-			}()
+			bootables = append(bootables, bootable)
 		}
+	}
+
+	By(func(left, right BootableProvider) bool {
+		return left.Priority() < right.Priority()
+	}).Sort(bootables)
+
+	for _, provider := range bootables {
+		go func(provider BootableProvider) {
+			if err := provider.Start(a.container); err != nil {
+				log.Error().Err(err).Msg("Start failed")
+			}
+		}(provider)
 	}
 
 	log.Info().Msg("Started")
 
-	<-sig
+	<-a.signal
 
 	log.Info().Msg("Shutdown")
 
-	for _, provider := range a.providers {
-		if bootable, ok := provider.(BootableProvider); ok {
-			if err := bootable.Stop(a.container); err != nil {
-				log.Error().Err(err).Msg("Stop failed")
-			}
+	for _, provider := range bootables {
+		if err := provider.Stop(a.container); err != nil {
+			log.Error().Err(err).Msg("Stop failed")
 		}
 	}
 
@@ -90,5 +95,7 @@ func (a *App) Run() (err error) {
 
 // Close Application
 func (a *App) Close() error {
+	a.signal <- syscall.SIGTERM
+
 	return nil
 }

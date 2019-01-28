@@ -23,16 +23,16 @@ func NewEventDispatcherServiceProvider() *EventDispatcherServiceProvider {
 	return &EventDispatcherServiceProvider{}
 }
 
-// Priority implements application.ServiceProvider
-func (p EventDispatcherServiceProvider) Priority() int {
-	return 0
-}
-
 // Register implements application.ServiceProvider
 func (p EventDispatcherServiceProvider) Register(app service.Container) {
 	app.Set(EventDispatcherKey, func(c service.Container) interface{} {
 		return eventemitter.New() // eventemitter.EventEmitter
 	})
+}
+
+// Priority implements application.BootableProvider
+func (p EventDispatcherServiceProvider) Priority() int {
+	return 0
 }
 
 // Start implements application.BootableProvider
