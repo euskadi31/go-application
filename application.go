@@ -56,8 +56,6 @@ func (a *App) Register(provider ServiceProvider) {
 func (a *App) Run() (err error) {
 	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
-	log.Info().Msg("Starting...")
-
 	bootables := []BootableProvider{}
 
 	for _, provider := range a.providers {
@@ -71,6 +69,8 @@ func (a *App) Run() (err error) {
 	By(func(left, right BootableProvider) bool {
 		return left.Priority() < right.Priority()
 	}).Sort(bootables)
+
+	log.Info().Msg("Starting...")
 
 	for _, provider := range bootables {
 		go func(provider BootableProvider) {
