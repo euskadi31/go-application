@@ -45,7 +45,7 @@ func New() Application {
 
 // Register ServiceProvider
 func (a *App) Register(provider ServiceProvider) {
-	provider.Register(a.container)
+	//provider.Register(a.container)
 
 	a.providers = append(a.providers, provider)
 }
