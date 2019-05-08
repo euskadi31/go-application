@@ -6,6 +6,7 @@ package application
 
 import (
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -13,34 +14,54 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockProvider struct{}
+type mockProvider struct {
+	RegisterCalled uint64
+	StartCalled    uint64
+	StopCalled     uint64
+}
 
-func (mockProvider) Register(app service.Container) {
-
+func (p *mockProvider) Register(app service.Container) {
+	atomic.AddUint64(&p.RegisterCalled, 1)
 }
 
 func (mockProvider) Priority() int {
 	return 1
 }
 
-func (mockProvider) Start(app service.Container) error {
+func (p *mockProvider) Start(app service.Container) error {
+	atomic.AddUint64(&p.StartCalled, 1)
+
 	return errors.New("fail")
 }
 
-func (mockProvider) Stop(app service.Container) error {
+func (p *mockProvider) Stop(app service.Container) error {
+	atomic.AddUint64(&p.StopCalled, 1)
+
 	return errors.New("fail")
 }
 
 func TestApplication(t *testing.T) {
+	providerMock1 := &mockProvider{}
+	providerMock2 := &mockProvider{}
+
 	app := New()
+	app.Register(providerMock1)
+	app.Register(providerMock2)
 
-	app.Register(&mockProvider{})
-
-	go func() {
+	go func(app Application) {
 		assert.NoError(t, app.Run())
-	}()
+	}(app)
 
 	time.Sleep(200 * time.Millisecond)
 
 	assert.NoError(t, app.Close())
+
+	time.Sleep(200 * time.Millisecond)
+
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock1.RegisterCalled))
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock2.RegisterCalled))
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock1.StartCalled))
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock2.StartCalled))
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock1.StopCalled))
+	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock2.StopCalled))
 }

@@ -6,17 +6,20 @@ package application
 
 import (
 	"sort"
+	"sync"
 
 	"github.com/euskadi31/go-eventemitter"
 	"github.com/euskadi31/go-service"
 )
 
 // ServiceProvider interface
+//go:generate mockery -case=underscore -inpkg -name=ServiceProvider
 type ServiceProvider interface {
 	Register(app service.Container)
 }
 
 // BootableProvider interface
+//go:generate mockery -case=underscore -inpkg -name=BootableProvider
 type BootableProvider interface {
 	Priority() int
 	Start(app service.Container) error
@@ -24,8 +27,20 @@ type BootableProvider interface {
 }
 
 // EventListenerProvider interface
+//go:generate mockery -case=underscore -inpkg -name=EventListenerProvider
 type EventListenerProvider interface {
 	Subscribe(app service.Container, dispatcher eventemitter.EventEmitter)
+}
+
+type providerRegister struct {
+	ServiceProvider
+	runner sync.Once
+}
+
+func (r *providerRegister) Register(app service.Container) {
+	r.runner.Do(func() {
+		r.ServiceProvider.Register(app)
+	})
 }
 
 type providerSorter struct {

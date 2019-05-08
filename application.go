@@ -27,7 +27,7 @@ var _ Application = (*App)(nil)
 type App struct {
 	signal    chan os.Signal
 	container service.Container
-	providers []ServiceProvider
+	providers []*providerRegister
 }
 
 // New Application
@@ -47,7 +47,9 @@ func New() Application {
 func (a *App) Register(provider ServiceProvider) {
 	//provider.Register(a.container)
 
-	a.providers = append(a.providers, provider)
+	a.providers = append(a.providers, &providerRegister{
+		ServiceProvider: provider,
+	})
 }
 
 // Run Application
@@ -61,7 +63,7 @@ func (a *App) Run() (err error) {
 	for _, provider := range a.providers {
 		provider.Register(a.container)
 
-		if bootable, ok := provider.(BootableProvider); ok {
+		if bootable, ok := provider.ServiceProvider.(BootableProvider); ok {
 			bootables = append(bootables, bootable)
 		}
 	}
