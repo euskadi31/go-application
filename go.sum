@@ -12,10 +12,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/euskadi31/go-eventemitter v1.1.0 h1:Gov9/9R94QUctOdZ7Ej2TARSA1TFyqmZnCsUzldxIk8=
 github.com/euskadi31/go-eventemitter v1.1.0/go.mod h1:l6mbRtF4lKMeHfuY0KjkPBxz9U4T21C36ma3rw9OJKQ=
-github.com/euskadi31/go-server v0.0.0-20171024213321-d419145e6b16 h1:e3/Qq53FUkIT10QbLZFMZiQ3JMssV5B74p6Ytb8K200=
-github.com/euskadi31/go-server v0.0.0-20171024213321-d419145e6b16/go.mod h1:ZtS5BCtxkN8d2R8U3PcN0//tXQgzQJK6+kXxWMea4zU=
-github.com/euskadi31/go-service v1.3.0 h1:z3eY7nv3LOVkL+qjsKOyaw66JcQ42m4B9Z9f+gAM9j8=
-github.com/euskadi31/go-service v1.3.0/go.mod h1:Vu3PQBD/elJ44N8KupR+id09BJ2AREa8mr0Y3s6xTzM=
+github.com/euskadi31/go-server v0.0.0-20171024213321-b552f3ddc8a4 h1:H0F8sKAp/ocr76XbICgTKvbghPzRs1vcKohEcKs8iEA=
+github.com/euskadi31/go-server v0.0.0-20171024213321-b552f3ddc8a4/go.mod h1:f1/ntGyitTNYNYfbuPSJ8bGMZ0xnHcfzDpo+6NxXpOE=
+github.com/euskadi31/go-service v1.3.1 h1:FH5vONJ1lbuGCY3ckhbitn9DIrqAMMOFIJLlmWqtZ3Y=
+github.com/euskadi31/go-service v1.3.1/go.mod h1:Vu3PQBD/elJ44N8KupR+id09BJ2AREa8mr0Y3s6xTzM=
 github.com/go-openapi/analysis v0.0.0-20171226173743-0db1e4cf47d6 h1:oDElN7vVcHPua1kAOBk/0DlSKs/Y8kxIDLCxgZ617XM=
 github.com/go-openapi/analysis v0.0.0-20171226173743-0db1e4cf47d6/go.mod h1:k70tL6pCuVxPJOHXQ+wIac1FUrvNkHolPie/cLEU6hI=
 github.com/go-openapi/errors v0.0.0-20180827163446-87bb65328877 h1:sf8YA8a5+bYe3Wcbhwd1IPjf+XJ9FOn5U/oYHUI896Q=
@@ -78,6 +78,8 @@ github.com/prometheus/common v0.0.0-20181126121408-4724e9255275 h1:PnBWHBf+6L0jO
 github.com/prometheus/common v0.0.0-20181126121408-4724e9255275/go.mod h1:daVV7qP5qjZbuso7PdcryaAu0sAZbrN9i7WWcTMWvro=
 github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a h1:9a8MnZMP0X2nLJdBg+pBmGgkJlSaKC2KaQmTCk1XDtE=
 github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
+github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
+github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/rs/zerolog v1.11.0 h1:DRuq/S+4k52uJzBQciUcofXx45GrMC6yrEbb/CoK6+M=
 github.com/rs/zerolog v1.11.0/go.mod h1:YbFCdg8HfsridGWAh22vktObvhZbQsZXe4/zB0OKkWU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
