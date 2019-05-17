@@ -1,12 +1,13 @@
 language: go
 
 sudo: required
-dist: trusty
+dist: xenial
 
 env:
   - GO111MODULE=on
 
 go:
+  - 1.12.x
   - 1.11.x
   - master
   - tip
@@ -16,8 +17,6 @@ matrix:
   allow_failures:
     - go: master
     - go: tip
-
-cache: apt
 
 install:
   - go get github.com/mattn/goveralls
