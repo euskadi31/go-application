@@ -15,11 +15,26 @@ Example
 ```go
 package main
 
-import "github.com/euskadi31/go-application"
+import (
+    "github.com/euskadi31/go-application"
+    "github.com/euskadi31/go-application/provider"
+)
 
 func main() {
     app := application.New()
 
+    app.Register(provider.NewEventDispatcherServiceProvider())
+    app.Register(provider.NewHTTPServiceProvider())
+
+    defer func() {
+		if err := app.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	if err := app.Run(); err != nil {
+		panic(err)
+	}
 }
 ```
 
