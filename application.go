@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/euskadi31/go-application/provider"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
 )
@@ -36,9 +35,6 @@ func New() Application {
 		signal:    make(chan os.Signal, 1),
 		container: service.New(),
 	}
-
-	app.Register(provider.NewEventDispatcherServiceProvider())
-	app.Register(provider.NewHTTPServiceProvider())
 
 	return app
 }
@@ -73,18 +69,22 @@ func (a *App) Run() (err error) {
 	log.Info().Msg("Starting...")
 
 	for _, provider := range bootables {
-		go func(provider BootableProvider) {
-			if err := provider.Start(a.container); err != nil {
+		go func(p BootableProvider) {
+			if err := p.Start(a.container); err != nil {
 				log.Error().Err(err).Msg("Start failed")
 			}
 		}(provider)
 	}
 
-	log.Info().Msg("Started")
-
 	<-a.signal
 
-	log.Info().Msg("Shutdown")
+	// Reversing order for closing
+	for i := len(bootables)/2 - 1; i >= 0; i-- {
+		opp := len(bootables) - 1 - i
+		bootables[i], bootables[opp] = bootables[opp], bootables[i]
+	}
+
+	log.Info().Msg("Shutdown...")
 
 	for _, provider := range bootables {
 		if err := provider.Stop(a.container); err != nil {

@@ -18,14 +18,15 @@ type mockProvider struct {
 	RegisterCalled uint64
 	StartCalled    uint64
 	StopCalled     uint64
+	priority       int
 }
 
 func (p *mockProvider) Register(app service.Container) {
 	atomic.AddUint64(&p.RegisterCalled, 1)
 }
 
-func (mockProvider) Priority() int {
-	return 1
+func (p mockProvider) Priority() int {
+	return p.priority
 }
 
 func (p *mockProvider) Start(app service.Container) error {
@@ -41,8 +42,12 @@ func (p *mockProvider) Stop(app service.Container) error {
 }
 
 func TestApplication(t *testing.T) {
-	providerMock1 := &mockProvider{}
-	providerMock2 := &mockProvider{}
+	providerMock1 := &mockProvider{
+		priority: 2,
+	}
+	providerMock2 := &mockProvider{
+		priority: 1,
+	}
 
 	app := New()
 	app.Register(providerMock1)
