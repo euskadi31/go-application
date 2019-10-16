@@ -5,6 +5,7 @@
 package provider
 
 import (
+	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-server"
 	"github.com/euskadi31/go-service"
 )
@@ -22,6 +23,11 @@ type HTTPServiceProvider struct {
 // NewHTTPServiceProvider constructor
 func NewHTTPServiceProvider() *HTTPServiceProvider {
 	return &HTTPServiceProvider{}
+}
+
+// Config implements application.ConfigProvider
+func (p HTTPServiceProvider) Config(cfg config.Configuration) {
+
 }
 
 // Register implements application.ServiceProvider

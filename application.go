@@ -5,10 +5,12 @@
 package application
 
 import (
+	"github.com/spf13/viper"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/euskadi31/go-application/provider"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
 )
@@ -36,6 +38,8 @@ func New() Application {
 		container: service.New(),
 	}
 
+	app.Register(provider.NewConfigServiceProvider())
+
 	return app
 }
 
@@ -53,6 +57,7 @@ func (a *App) Run() (err error) {
 	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
 	bootables := []BootableProvider{}
+	configurables := []ConfigurableProvider{}
 
 	for _, provider := range a.providers {
 		provider.Register(a.container)
@@ -60,7 +65,13 @@ func (a *App) Run() (err error) {
 		if bootable, ok := provider.ServiceProvider.(BootableProvider); ok {
 			bootables = append(bootables, bootable)
 		}
+
+		if configurable, ok := provider.ServiceProvider.(ConfigurableProvider); ok {
+			configurables = append(configurables, configurable)
+		}
 	}
+
+	a.configure(configurables)
 
 	By(func(left, right BootableProvider) bool {
 		return left.Priority() < right.Priority()
@@ -100,4 +111,16 @@ func (a *App) Close() error {
 	a.signal <- syscall.SIGTERM
 
 	return nil
+}
+
+func (a *App) configure(configurables []ConfigurableProvider) {
+	log.Info().Msg("Configuring...")
+
+	a.container.Extend(provider.ConfigKey, func(cfg *viper.Viper, c service.Container) *viper.Viper {
+		for _, config := range configurables {
+			config.Config(cfg)
+		}
+
+		return cfg
+	})
 }

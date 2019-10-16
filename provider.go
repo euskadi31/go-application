@@ -8,6 +8,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-eventemitter"
 	"github.com/euskadi31/go-service"
 )
@@ -30,6 +31,12 @@ type BootableProvider interface {
 //go:generate mockery -case=underscore -inpkg -name=EventListenerProvider
 type EventListenerProvider interface {
 	Subscribe(app service.Container, dispatcher eventemitter.EventEmitter)
+}
+
+// ConfigurableProvider interface
+//go:generate mockery -case=underscore -inpkg -name=ConfigurableProvider
+type ConfigurableProvider interface {
+	Config(cfg config.Configuration)
 }
 
 type providerRegister struct {
