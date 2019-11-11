@@ -17,6 +17,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/euskadi31/go-eventemitter v1.1.0 h1:Gov9/9R94QUctOdZ7Ej2TARSA1TFyqmZnCsUzldxIk8=
 github.com/euskadi31/go-eventemitter v1.1.0/go.mod h1:l6mbRtF4lKMeHfuY0KjkPBxz9U4T21C36ma3rw9OJKQ=
+github.com/euskadi31/go-eventemitter v1.1.1 h1:VrDOCjM1uaQfq3XGlrZXce+wL6JtiecPtKPwS2jATo8=
+github.com/euskadi31/go-eventemitter v1.1.1/go.mod h1:2FzLg7x4u58JiXblyOwQJ+O+tAcj05CFKnN2Yz8yXEY=
 github.com/euskadi31/go-server v0.0.0-20191009111847-5cebdca2a652 h1:diyt/azJh1uQh36GtBt8nNXDP70+d9HusQTcSO5F81U=
 github.com/euskadi31/go-server v0.0.0-20191009111847-5cebdca2a652/go.mod h1:D+4tR71dvwujbCkvjvXolvMHOENAGXrkY7j5DFzfFgE=
 github.com/euskadi31/go-server v0.0.0-20191009113222-686c429d32ee/go.mod h1:D+4tR71dvwujbCkvjvXolvMHOENAGXrkY7j5DFzfFgE=
