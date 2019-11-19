@@ -24,6 +24,8 @@ github.com/euskadi31/go-server v0.0.0-20191009111847-5cebdca2a652/go.mod h1:D+4t
 github.com/euskadi31/go-server v0.0.0-20191009113222-686c429d32ee/go.mod h1:D+4tR71dvwujbCkvjvXolvMHOENAGXrkY7j5DFzfFgE=
 github.com/euskadi31/go-service v1.3.1 h1:FH5vONJ1lbuGCY3ckhbitn9DIrqAMMOFIJLlmWqtZ3Y=
 github.com/euskadi31/go-service v1.3.1/go.mod h1:Vu3PQBD/elJ44N8KupR+id09BJ2AREa8mr0Y3s6xTzM=
+github.com/euskadi31/go-service v1.3.2 h1:Z7VoQI4uk91Nyc2yuwgOTko13scxk5Zoh+Ehp7KCOVM=
+github.com/euskadi31/go-service v1.3.2/go.mod h1:f4rLyMfpQCs63oKufQa6exYPjPGrH7dL9XMJY09WajI=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-openapi/analysis v0.0.0-20171226173743-0db1e4cf47d6 h1:oDElN7vVcHPua1kAOBk/0DlSKs/Y8kxIDLCxgZ617XM=
