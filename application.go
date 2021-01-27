@@ -5,12 +5,14 @@
 package application
 
 import (
-	"github.com/spf13/viper"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/euskadi31/go-application/provider"
+	"github.com/hashicorp/hcl/v2"
+
+	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
 )
@@ -18,6 +20,7 @@ import (
 // Application interface
 type Application interface {
 	Register(provider ServiceProvider)
+	AddConfigPath(path string)
 	Run() error
 	Close() error
 }
@@ -26,21 +29,55 @@ var _ Application = (*App)(nil)
 
 // App struct
 type App struct {
-	signal    chan os.Signal
-	container service.Container
-	providers []*providerRegister
+	parser            config.Parser
+	name              string
+	configSearchPaths []string
+	cfg               *config.Config
+	signal            chan os.Signal
+	container         service.Container
+	providers         []*providerRegister
 }
 
 // New Application
-func New() Application {
+func New(name string) Application {
 	app := &App{
+		name: name,
+		configSearchPaths: []string{
+			"./",
+			"~/." + name + "/",
+			"/etc/" + name + "/",
+		},
 		signal:    make(chan os.Signal, 1),
 		container: service.New(),
+		parser:    config.NewParser(nil),
 	}
 
-	app.Register(provider.NewConfigServiceProvider())
-
 	return app
+}
+
+// AddConfigPath to search paths
+func (a *App) AddConfigPath(path string) {
+	a.configSearchPaths = append(a.configSearchPaths, path)
+}
+
+func (a *App) loadConfig() hcl.Diagnostics {
+
+	for _, p := range a.configSearchPaths {
+		if a.parser.IsConfigDir(p) {
+			cfg, diags := a.parser.LoadConfigDir(p)
+			if diags.HasErrors() {
+				return diags
+			}
+
+			a.cfg = cfg
+
+			return nil
+		}
+	}
+
+	a.cfg, _ = config.NewConfig(nil)
+
+	return nil
 }
 
 // Register ServiceProvider
@@ -54,10 +91,14 @@ func (a *App) Register(provider ServiceProvider) {
 
 // Run Application
 func (a *App) Run() (err error) {
+	if err := a.loadConfig(); err != nil {
+		return err
+	}
+
 	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
 	bootables := []BootableProvider{}
-	configurables := []ConfigurableProvider{}
+	configurables := map[string]ConfigurableProvider{}
 
 	for _, provider := range a.providers {
 		provider.Register(a.container)
@@ -67,11 +108,13 @@ func (a *App) Run() (err error) {
 		}
 
 		if configurable, ok := provider.ServiceProvider.(ConfigurableProvider); ok {
-			configurables = append(configurables, configurable)
+			configurables[provider.Name()] = configurable
 		}
 	}
 
-	a.configure(configurables)
+	if diags := a.configure(configurables); diags.HasErrors() {
+		return diags
+	}
 
 	By(func(left, right BootableProvider) bool {
 		return left.Priority() < right.Priority()
@@ -113,14 +156,25 @@ func (a *App) Close() error {
 	return nil
 }
 
-func (a *App) configure(configurables []ConfigurableProvider) {
+func (a *App) configure(configurables map[string]ConfigurableProvider) hcl.Diagnostics {
 	log.Info().Msg("Configuring...")
 
-	a.container.Extend(provider.ConfigKey, func(cfg *viper.Viper, c service.Container) *viper.Viper {
-		for _, config := range configurables {
-			config.Config(cfg)
+	for _, p := range a.cfg.Providers {
+		if configurable, ok := configurables[p.Type]; ok {
+			diags := configurable.Config(a.parser.Context(), p)
+			if diags.HasErrors() {
+				return diags
+			}
+		} else {
+			return hcl.Diagnostics{
+				{
+					Severity: hcl.DiagError,
+					Summary:  "Provider not registered",
+					Detail:   fmt.Sprintf("The provider %q is not registered in app.", p.Type),
+				},
+			}
 		}
+	}
 
-		return cfg
-	})
+	return hcl.Diagnostics{}
 }

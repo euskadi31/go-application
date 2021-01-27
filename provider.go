@@ -11,12 +11,14 @@ import (
 	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-eventemitter"
 	"github.com/euskadi31/go-service"
+	"github.com/hashicorp/hcl/v2"
 )
 
 // ServiceProvider interface
 //go:generate mockery -case=underscore -inpkg -name=ServiceProvider
 type ServiceProvider interface {
 	Register(app service.Container)
+	Name() string
 }
 
 // BootableProvider interface
@@ -36,7 +38,7 @@ type EventListenerProvider interface {
 // ConfigurableProvider interface
 //go:generate mockery -case=underscore -inpkg -name=ConfigurableProvider
 type ConfigurableProvider interface {
-	Config(cfg config.Configuration)
+	Config(ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics
 }
 
 type providerRegister struct {

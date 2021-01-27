@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	app := application.New()
+	app := application.New("demo-app")
 
 	defer func() {
 		if err := app.Close(); err != nil {
