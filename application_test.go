@@ -6,6 +6,7 @@ package application
 
 import (
 	"errors"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -26,6 +27,7 @@ type mockProviderWithConfig struct {
 	NameCalled     uint64
 	ConfigCalled   uint64
 	name           string
+	mtx            sync.RWMutex
 	cfg            *mockProviderConfig
 }
 
@@ -39,8 +41,18 @@ func (p *mockProviderWithConfig) Name() string {
 	return p.name
 }
 
+func (p *mockProviderWithConfig) GetConfig() *mockProviderConfig {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	return p.cfg
+}
+
 func (p *mockProviderWithConfig) Config(ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics {
 	atomic.AddUint64(&p.ConfigCalled, 1)
+
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 
 	return schema.Parse(ctx, p.cfg)
 }
@@ -137,5 +149,5 @@ func TestApplicationWithConfig(t *testing.T) {
 	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock.NameCalled))
 	assert.Equal(t, uint64(1), atomic.LoadUint64(&providerMock.ConfigCalled))
 
-	assert.Equal(t, "bar", providerMock.cfg.Foo)
+	assert.Equal(t, "bar", providerMock.GetConfig().Foo)
 }

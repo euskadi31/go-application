@@ -10,12 +10,14 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+// ConfigSchema struct
 type ConfigSchema struct {
 	Variables   []*VariableSchema  `hcl:"var,block"`
 	Application *ApplicationSchema `hcl:"app,block"`
 	Providers   []*ProviderSchema  `hcl:"provider,block"`
 }
 
+// VariableSchema struct
 type VariableSchema struct {
 	Name  string    `hcl:"name,label"`
 	Value cty.Value `hcl:"value"`
@@ -25,6 +27,7 @@ func (p VariableSchema) key() string {
 	return p.Name
 }
 
+// ApplicationSchema struct
 type ApplicationSchema struct {
 }
 
@@ -32,6 +35,7 @@ func (left *ApplicationSchema) merge(right *ApplicationSchema) {
 
 }
 
+// ProviderSchema struct
 type ProviderSchema struct {
 	Type string   `hcl:"type,label"`
 	Key  string   `hcl:"key,optional"`

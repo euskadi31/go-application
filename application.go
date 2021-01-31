@@ -156,7 +156,7 @@ func (a *App) Close() error {
 	return nil
 }
 
-func (a *App) configure(configurables map[string]ConfigurableProvider) hcl.Diagnostics {
+func (a App) configure(configurables map[string]ConfigurableProvider) hcl.Diagnostics {
 	log.Info().Msg("Configuring...")
 
 	for _, p := range a.cfg.Providers {
