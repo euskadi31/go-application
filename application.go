@@ -7,8 +7,13 @@ package application
 import (
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
+	"github.com/hashicorp/hcl/v2"
+
+	"github.com/euskadi31/go-application/config"
+	"github.com/euskadi31/go-application/provider"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
 )
@@ -16,6 +21,7 @@ import (
 // Application interface
 type Application interface {
 	Register(provider ServiceProvider)
+	AddConfigPath(path string)
 	Run() error
 	Close() error
 }
@@ -24,19 +30,85 @@ var _ Application = (*App)(nil)
 
 // App struct
 type App struct {
-	signal    chan os.Signal
-	container service.Container
-	providers []*providerRegister
+	parser            config.Parser
+	name              string
+	configSearchPaths []string
+	cfg               *config.Config
+	signal            chan os.Signal
+	container         service.Container
+	providers         []*providerRegister
 }
 
 // New Application
-func New() Application {
+func New(name string) Application {
 	app := &App{
+		name: name,
+		configSearchPaths: []string{
+			"./",
+			"~/." + name + "/",
+			"/etc/" + name + "/",
+		},
 		signal:    make(chan os.Signal, 1),
 		container: service.New(),
+		parser:    config.NewParser(nil),
 	}
 
+	app.Register(provider.NewLoggerServiceProvider())
+
 	return app
+}
+
+// AddConfigPath to search paths
+func (a *App) AddConfigPath(path string) {
+	a.configSearchPaths = append(a.configSearchPaths, path)
+}
+
+func (a *App) getVarEnvs() []string {
+	envs := []string{}
+
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, a.cfg.App.EnvPrefix+"_") {
+			envs = append(envs, strings.Replace(env, a.cfg.App.EnvPrefix+"_", "", 1))
+		}
+	}
+
+	return envs
+}
+
+func (a *App) bindVarEnvs() {
+
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, a.cfg.App.EnvPrefix+"_") {
+
+		}
+	}
+}
+
+func (a *App) loadConfig() hcl.Diagnostics {
+	defer func() {
+		a.cfg.App.Name = a.name
+
+		if a.cfg.App.EnvPrefix == "" {
+			a.cfg.App.EnvPrefix = strings.ToUpper(strings.Replace(a.name, "-", "_", -1))
+		}
+	}()
+
+	for _, p := range a.configSearchPaths {
+		if a.parser.IsConfigDir(p) {
+			cfg, diags := a.parser.LoadConfigDir(p)
+			if diags.HasErrors() {
+				return diags
+			}
+
+			a.cfg = cfg
+
+			return nil
+		}
+	}
+
+	a.cfg, _ = config.NewConfig(nil)
+
+	return nil
 }
 
 // Register ServiceProvider
@@ -50,9 +122,16 @@ func (a *App) Register(provider ServiceProvider) {
 
 // Run Application
 func (a *App) Run() (err error) {
+	if err := a.loadConfig(); err != nil {
+		return err
+	}
+
+	a.container.SetValue("config", a.cfg)
+
 	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
 	bootables := []BootableProvider{}
+	configurables := map[string]ConfigurableProvider{}
 
 	for _, provider := range a.providers {
 		provider.Register(a.container)
@@ -60,7 +139,18 @@ func (a *App) Run() (err error) {
 		if bootable, ok := provider.ServiceProvider.(BootableProvider); ok {
 			bootables = append(bootables, bootable)
 		}
+
+		if configurable, ok := provider.ServiceProvider.(ConfigurableProvider); ok {
+			configurables[provider.Name()] = configurable
+		}
 	}
+
+	if diags := a.configure(configurables); diags.HasErrors() {
+		return diags
+	}
+
+	// load logger provider
+	a.container.Get(provider.LoggerKey)
 
 	By(func(left, right BootableProvider) bool {
 		return left.Priority() < right.Priority()
@@ -100,4 +190,25 @@ func (a *App) Close() error {
 	a.signal <- syscall.SIGTERM
 
 	return nil
+}
+
+func (a *App) findConfigProviderByName(t string) *config.ProviderSchema {
+	for _, p := range a.cfg.Providers {
+		if p.Type == t {
+			return p
+		}
+	}
+
+	return nil
+}
+
+func (a *App) configure(configurables map[string]ConfigurableProvider) hcl.Diagnostics {
+	for k, configurable := range configurables {
+
+		p := a.findConfigProviderByName(k)
+
+		configurable.Config(a.container, a.parser.Context(), p)
+	}
+
+	return hcl.Diagnostics{}
 }
