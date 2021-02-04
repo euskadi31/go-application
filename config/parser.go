@@ -11,10 +11,11 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/spf13/afero"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
 )
 
 // Parser interface
-//go:generate mockery -case=underscore -inpkg -name=Parser
+//go:generate mockery --case=underscore --inpackage --name=Parser
 type Parser interface {
 	Parse(filename string, src []byte) (*ConfigSchema, hcl.Diagnostics)
 	LoadConfigFile(path string) (*ConfigSchema, hcl.Diagnostics)
@@ -61,6 +62,15 @@ func (p *parser) Parse(filename string, src []byte) (*ConfigSchema, hcl.Diagnost
 
 	diags = gohcl.DecodeBody(f.Body, p.ctx, cfg)
 
+	if err := p.putAppToContext(cfg); err != nil {
+		diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Configuration app failed",
+			Detail:   err.Error(),
+		})
+		return nil, diags
+	}
+
 	p.parseConfigVars(cfg)
 
 	for _, p := range cfg.Providers {
@@ -70,6 +80,22 @@ func (p *parser) Parse(filename string, src []byte) (*ConfigSchema, hcl.Diagnost
 	}
 
 	return cfg, diags
+}
+
+func (p *parser) putAppToContext(cfg *ConfigSchema) error {
+	t, err := gocty.ImpliedType(cfg.Application)
+	if err != nil {
+		return err
+	}
+
+	v, err := gocty.ToCtyValue(cfg.Application, t)
+	if err != nil {
+		return err
+	}
+
+	p.ctx.Variables["app"] = v
+
+	return nil
 }
 
 func (p *parser) parseConfigVars(cfg *ConfigSchema) {

@@ -4,7 +4,42 @@ var "hostname" {
 }
 
 app {
+    environment = env.ENV
+    env_prefix = "DEMO_APP"
+}
 
+logger {
+    level = "debug"
+
+    provider "console" {
+        where {
+            env = ["local"]
+        }
+
+    }
+
+    provider "ecs" {
+        where {
+            env = ["prod", "dev"]
+        }
+    }
+}
+
+provider "logger" {
+    level = "debug"
+
+    writer "console" {
+        where {
+            env = ["local"]
+        }
+
+    }
+
+    writer "ecs" {
+        where {
+            env = ["prod", "dev"]
+        }
+    }
 }
 
 provider "mysql" {

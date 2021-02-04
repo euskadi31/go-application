@@ -4,7 +4,7 @@ var "hostname" {
 }
 
 app {
-
+    environment = "dev"
 }
 
 provider "mysql" {

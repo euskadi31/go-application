@@ -15,14 +15,14 @@ import (
 )
 
 // ServiceProvider interface
-//go:generate mockery -case=underscore -inpkg -name=ServiceProvider
+//go:generate mockery --case=underscore --inpackage --name=ServiceProvider
 type ServiceProvider interface {
 	Register(app service.Container)
 	Name() string
 }
 
 // BootableProvider interface
-//go:generate mockery -case=underscore -inpkg -name=BootableProvider
+//go:generate mockery --case=underscore --inpackage --name=BootableProvider
 type BootableProvider interface {
 	Priority() int
 	Start(app service.Container) error
@@ -30,15 +30,15 @@ type BootableProvider interface {
 }
 
 // EventListenerProvider interface
-//go:generate mockery -case=underscore -inpkg -name=EventListenerProvider
+//go:generate mockery --case=underscore --inpackage --name=EventListenerProvider
 type EventListenerProvider interface {
 	Subscribe(app service.Container, dispatcher eventemitter.EventEmitter)
 }
 
 // ConfigurableProvider interface
-//go:generate mockery -case=underscore -inpkg -name=ConfigurableProvider
+//go:generate mockery --case=underscore --inpackage --name=ConfigurableProvider
 type ConfigurableProvider interface {
-	Config(ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics
+	Config(c service.Container, ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics
 }
 
 type providerRegister struct {

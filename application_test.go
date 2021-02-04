@@ -48,7 +48,7 @@ func (p *mockProviderWithConfig) GetConfig() *mockProviderConfig {
 	return p.cfg
 }
 
-func (p *mockProviderWithConfig) Config(ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics {
+func (p *mockProviderWithConfig) Config(c service.Container, ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics {
 	atomic.AddUint64(&p.ConfigCalled, 1)
 
 	p.mtx.Lock()

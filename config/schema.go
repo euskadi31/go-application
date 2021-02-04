@@ -29,6 +29,9 @@ func (p VariableSchema) key() string {
 
 // ApplicationSchema struct
 type ApplicationSchema struct {
+	Name        string `cty:"name"`
+	Environment string `hcl:"environment,optional" cty:"environment"`
+	EnvPrefix   string `hcl:"env_prefix,optional" cty:"env_prefix"`
 }
 
 func (left *ApplicationSchema) merge(right *ApplicationSchema) {
