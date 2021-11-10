@@ -13,7 +13,7 @@ import (
 
 	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-service"
-	"github.com/hashicorp/hcl/v2"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,13 +48,15 @@ func (p *mockProviderWithConfig) GetConfig() *mockProviderConfig {
 	return p.cfg
 }
 
-func (p *mockProviderWithConfig) Config(c service.Container, ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics {
+func (p *mockProviderWithConfig) Config(c service.Container, options *viper.Viper) error {
 	atomic.AddUint64(&p.ConfigCalled, 1)
 
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	return schema.Parse(ctx, p.cfg)
+	options.SetDefault("foo", "default")
+
+	return options.Unmarshal(p.cfg)
 }
 
 type mockProvider struct {

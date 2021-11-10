@@ -10,9 +10,9 @@ import (
 
 	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-service"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 // Logger Services keys
@@ -92,16 +92,16 @@ func (p LoggerServiceProvider) Register(app service.Container) {
 }
 
 // Config provider
-func (p LoggerServiceProvider) Config(app service.Container, ctx *hcl.EvalContext, schema *config.ProviderSchema) (diags hcl.Diagnostics) {
-	cfg := &LoggerServiceProviderConfig{
-		Level: "info",
-	}
+func (p LoggerServiceProvider) Config(app service.Container, options *viper.Viper) error {
+	cfg := &LoggerServiceProviderConfig{}
 
-	if schema != nil {
-		diags = schema.Parse(ctx, cfg)
+	options.SetDefault("level", "info")
+
+	if err := options.Unmarshal(cfg); err != nil {
+		return err
 	}
 
 	app.SetValue(LoggerConfigKey, cfg)
 
-	return diags
+	return nil
 }

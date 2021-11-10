@@ -5,17 +5,21 @@
 package application
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/hcl/v2"
 
 	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-application/provider"
 	"github.com/euskadi31/go-service"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 // Application interface
@@ -30,7 +34,7 @@ var _ Application = (*App)(nil)
 
 // App struct
 type App struct {
-	parser            config.Parser
+	options           *viper.Viper
 	name              string
 	configSearchPaths []string
 	cfg               *config.Config
@@ -42,7 +46,8 @@ type App struct {
 // New Application
 func New(name string) Application {
 	app := &App{
-		name: name,
+		options: viper.New(),
+		name:    name,
 		configSearchPaths: []string{
 			"./",
 			"~/." + name + "/",
@@ -50,7 +55,6 @@ func New(name string) Application {
 		},
 		signal:    make(chan os.Signal, 1),
 		container: service.New(),
-		parser:    config.NewParser(nil),
 	}
 
 	app.Register(provider.NewLoggerServiceProvider())
@@ -63,50 +67,39 @@ func (a *App) AddConfigPath(path string) {
 	a.configSearchPaths = append(a.configSearchPaths, path)
 }
 
-func (a *App) getVarEnvs() []string {
-	envs := []string{}
-
-	for _, env := range os.Environ() {
-		if strings.HasPrefix(env, a.cfg.App.EnvPrefix+"_") {
-			envs = append(envs, strings.Replace(env, a.cfg.App.EnvPrefix+"_", "", 1))
-		}
-	}
-
-	return envs
-}
-
-func (a *App) bindVarEnvs() {
-
-	for _, env := range os.Environ() {
-		if strings.HasPrefix(env, a.cfg.App.EnvPrefix+"_") {
-
-		}
-	}
-}
-
 func (a *App) loadConfig() hcl.Diagnostics {
-	defer func() {
-		a.cfg.App.Name = a.name
-
-		if a.cfg.App.EnvPrefix == "" {
-			a.cfg.App.EnvPrefix = strings.ToUpper(strings.Replace(a.name, "-", "_", -1))
-		}
-	}()
+	a.options.SetConfigName("config")
 
 	for _, p := range a.configSearchPaths {
-		if a.parser.IsConfigDir(p) {
-			cfg, diags := a.parser.LoadConfigDir(p)
-			if diags.HasErrors() {
-				return diags
-			}
+		a.options.AddConfigPath(p)
+	}
 
-			a.cfg = cfg
+	a.options.SetEnvPrefix(strings.Replace(a.name, "-", "_", -1))
+	a.options.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	a.options.AutomaticEnv()
 
-			return nil
+	if err := a.options.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			panic(fmt.Errorf("fatal error config file: %w", err))
 		}
 	}
 
-	a.cfg, _ = config.NewConfig(nil)
+	schema := &config.ConfigSchema{}
+
+	if err := a.options.Unmarshal(schema); err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	cfg, diags := config.NewConfig([]*config.ConfigSchema{schema})
+	if diags.HasErrors() {
+		return diags
+	}
+
+	defer func() {
+		a.cfg.App.Name = a.name
+	}()
+
+	a.cfg = cfg
 
 	return nil
 }
@@ -145,8 +138,8 @@ func (a *App) Run() (err error) {
 		}
 	}
 
-	if diags := a.configure(configurables); diags.HasErrors() {
-		return diags
+	if err := a.configure(configurables); err != nil {
+		return err
 	}
 
 	// load logger provider
@@ -192,23 +185,26 @@ func (a *App) Close() error {
 	return nil
 }
 
-func (a *App) findConfigProviderByName(t string) *config.ProviderSchema {
-	for _, p := range a.cfg.Providers {
-		if p.Type == t {
-			return p
+func (a *App) configure(configurables map[string]ConfigurableProvider) error {
+	for k, configurable := range configurables {
+		sc := a.options.Sub("provider")
+
+		b, _ := json.Marshal(sc.AllSettings())
+
+		c := string(b)
+
+		spew.Dump(c)
+		spew.Dump(k)
+
+		//sc := a.options.Sub("provider." + k)
+		if sc == nil {
+			sc = viper.New()
+		}
+
+		if err := configurable.Config(a.container, sc); err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func (a *App) configure(configurables map[string]ConfigurableProvider) hcl.Diagnostics {
-	for k, configurable := range configurables {
-
-		p := a.findConfigProviderByName(k)
-
-		configurable.Config(a.container, a.parser.Context(), p)
-	}
-
-	return hcl.Diagnostics{}
 }

@@ -8,10 +8,9 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/euskadi31/go-application/config"
 	"github.com/euskadi31/go-eventemitter"
 	"github.com/euskadi31/go-service"
-	"github.com/hashicorp/hcl/v2"
+	"github.com/spf13/viper"
 )
 
 // ServiceProvider interface
@@ -38,7 +37,7 @@ type EventListenerProvider interface {
 // ConfigurableProvider interface
 //go:generate mockery --case=underscore --inpackage --name=ConfigurableProvider
 type ConfigurableProvider interface {
-	Config(c service.Container, ctx *hcl.EvalContext, schema *config.ProviderSchema) hcl.Diagnostics
+	Config(c service.Container, options *viper.Viper) error
 }
 
 type providerRegister struct {
