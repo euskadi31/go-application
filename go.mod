@@ -18,7 +18,7 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/objx v0.3.0 // indirect
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 	github.com/zenazn/goji v1.0.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.4 // indirect
 	golang.org/x/net v0.0.0-20211109214657-ef0fda0de508 // indirect
