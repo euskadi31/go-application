@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/rs/zerolog v1.26.1
+	github.com/rs/zerolog v1.27.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.2
 	github.com/zenazn/goji v1.0.1 // indirect
