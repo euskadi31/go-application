@@ -9,38 +9,40 @@ import (
 	"github.com/euskadi31/go-service"
 )
 
-// Dispatcher Services keys
+// Dispatcher Services keys.
 const (
 	EventDispatcherKey = "event.dispatcher"
 )
 
-// EventDispatcherServiceProvider struct
+// EventDispatcherServiceProvider struct.
 type EventDispatcherServiceProvider struct {
 }
 
-// NewEventDispatcherServiceProvider constructor
+// NewEventDispatcherServiceProvider constructor.
 func NewEventDispatcherServiceProvider() *EventDispatcherServiceProvider {
 	return &EventDispatcherServiceProvider{}
 }
 
-// Register implements application.ServiceProvider
+// Register implements application.ServiceProvider.
 func (p EventDispatcherServiceProvider) Register(app service.Container) {
 	app.Set(EventDispatcherKey, func(c service.Container) interface{} {
 		return eventemitter.New() // eventemitter.EventEmitter
 	})
 }
 
-// Priority implements application.BootableProvider
+// Priority implements application.BootableProvider.
 func (p EventDispatcherServiceProvider) Priority() int {
 	return 0
 }
 
-// Start implements application.BootableProvider
+// Start implements application.BootableProvider.
 func (p EventDispatcherServiceProvider) Start(app service.Container) error {
 	return nil
 }
 
-// Stop implements application.BootableProvider
+// Stop implements application.BootableProvider.
+//
+// nolint: forcetypeassert
 func (p EventDispatcherServiceProvider) Stop(app service.Container) error {
 	dispatcher := app.Get(EventDispatcherKey).(eventemitter.EventEmitter)
 

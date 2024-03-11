@@ -9,22 +9,24 @@ import (
 	"github.com/euskadi31/go-service"
 )
 
-// HTTP Services keys
+// HTTP Services keys.
 const (
 	HTTPServerConfigKey = "http.server.config"
 	HTTPServerKey       = "http.server"
 )
 
-// HTTPServiceProvider struct
+// HTTPServiceProvider struct.
 type HTTPServiceProvider struct {
 }
 
-// NewHTTPServiceProvider constructor
+// NewHTTPServiceProvider constructor.
 func NewHTTPServiceProvider() *HTTPServiceProvider {
 	return &HTTPServiceProvider{}
 }
 
-// Register implements application.ServiceProvider
+// Register implements application.ServiceProvider.
+//
+// nolint: forcetypeassert,wrapcheck
 func (p HTTPServiceProvider) Register(app service.Container) {
 	app.Set(HTTPServerConfigKey, func(c service.Container) interface{} {
 		return &server.Configuration{}
@@ -39,19 +41,23 @@ func (p HTTPServiceProvider) Register(app service.Container) {
 	})
 }
 
-// Priority implements application.BootableProvider
+// Priority implements application.BootableProvider.
 func (p HTTPServiceProvider) Priority() int {
 	return 255
 }
 
-// Start implements application.BootableProvider
+// Start implements application.BootableProvider.
+//
+// nolint: forcetypeassert,wrapcheck
 func (p HTTPServiceProvider) Start(app service.Container) error {
 	serv := app.Get(HTTPServerKey).(*server.Server)
 
 	return serv.Run()
 }
 
-// Stop implements application.BootableProvider
+// Stop implements application.BootableProvider.
+//
+// nolint: forcetypeassert,wrapcheck
 func (p HTTPServiceProvider) Stop(app service.Container) error {
 	serv := app.Get(HTTPServerKey).(*server.Server)
 
