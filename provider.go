@@ -12,13 +12,15 @@ import (
 	"github.com/euskadi31/go-service"
 )
 
-// ServiceProvider interface
+// ServiceProvider interface.
+//
 //go:generate mockery -case=underscore -inpkg -name=ServiceProvider
 type ServiceProvider interface {
 	Register(app service.Container)
 }
 
-// BootableProvider interface
+// BootableProvider interface.
+//
 //go:generate mockery -case=underscore -inpkg -name=BootableProvider
 type BootableProvider interface {
 	Priority() int
@@ -26,7 +28,8 @@ type BootableProvider interface {
 	Stop(app service.Container) error
 }
 
-// EventListenerProvider interface
+// EventListenerProvider interface.
+//
 //go:generate mockery -case=underscore -inpkg -name=EventListenerProvider
 type EventListenerProvider interface {
 	Subscribe(app service.Container, dispatcher eventemitter.EventEmitter)
@@ -63,7 +66,7 @@ func (s *providerSorter) Less(i, j int) bool {
 	return s.by(s.providers[i], s.providers[j])
 }
 
-// By sorter
+// By sorter.
 type By func(left, right BootableProvider) bool
 
 // Sort is a method on the function type, By, that sorts the argument slice according to the function.

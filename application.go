@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Application interface
+// Application interface.
 type Application interface {
 	Register(provider ServiceProvider)
 	Run() error
@@ -22,14 +22,14 @@ type Application interface {
 
 var _ Application = (*App)(nil)
 
-// App struct
+// App struct.
 type App struct {
 	signal    chan os.Signal
 	container service.Container
 	providers []*providerRegister
 }
 
-// New Application
+// New Application.
 func New() Application {
 	app := &App{
 		signal:    make(chan os.Signal, 1),
@@ -39,16 +39,14 @@ func New() Application {
 	return app
 }
 
-// Register ServiceProvider
+// Register ServiceProvider.
 func (a *App) Register(provider ServiceProvider) {
-	//provider.Register(a.container)
-
 	a.providers = append(a.providers, &providerRegister{
 		ServiceProvider: provider,
 	})
 }
 
-// Run Application
+// Run Application.
 func (a *App) Run() (err error) {
 	signal.Notify(a.signal, os.Interrupt, syscall.SIGTERM)
 
@@ -95,7 +93,7 @@ func (a *App) Run() (err error) {
 	return nil
 }
 
-// Close Application
+// Close Application.
 func (a *App) Close() error {
 	a.signal <- syscall.SIGTERM
 
