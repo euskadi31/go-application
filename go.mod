@@ -21,7 +21,7 @@ require (
 	github.com/zenazn/goji v1.0.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.4 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
 
 go 1.12
