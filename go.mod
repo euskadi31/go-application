@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/zenazn/goji v1.0.1 // indirect
 	go.mongodb.org/mongo-driver v1.7.4 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
 
