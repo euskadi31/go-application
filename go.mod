@@ -5,7 +5,7 @@ require (
 	github.com/euskadi31/go-server v1.0.1-0.20211110234347-e82196ed43d4
 	github.com/euskadi31/go-service v1.4.0
 	github.com/rs/zerolog v1.34.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 )
 
 require (
